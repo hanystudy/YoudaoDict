@@ -1,9 +1,14 @@
 "use strict";
 
+import md5 from 'md5';
+
 class Youdao {
   constructor(from, key, resType, query) {
     [this.from, this.key, this.resType, this.query] = [from, key, resType, query];
-    this.requestUrl = `https://fanyi.youdao.com/openapi.do?keyfrom=${this.from}&key=${this.key}&type=data&doctype=${this.resType}&version=1.1&q=`;
+    const [FROM, TO] = ['en', 'zh-CHS'];
+    let salt = Date.now();
+    let sign = md5(`${this.from}${this.query}${salt}${this.key}`);
+    this.requestUrl = `https://openapi.youdao.com/api?from=${FROM}&to=${TO}&appKey=${this.from}&salt=${salt}&sign=${sign}&q=${this.query}`;
   }
 
   isChinese(str) {
@@ -77,12 +82,12 @@ class Youdao {
     _this.removeReferrer();
 
     return new Promise((resolve, reject) => {
-      fetch(`${this.requestUrl}${encodeURIComponent(this.query)}`)
+      fetch(`${this.requestUrl}`)
         .then(res => {
           if (res.ok) {
             res.json().then(data => {
               let result;
-              if (data.errorCode !== 0) {
+              if (data.errorCode !== '0') {
                 reject('Query failed');
                 return;
               }

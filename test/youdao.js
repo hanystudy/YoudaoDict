@@ -4,10 +4,13 @@ import 'mocha';
 import {expect} from 'chai';
 import fetch from 'node-fetch';
 import Youdao from '../src/script/util/youdao';
+import md5 from 'md5';
 
 describe(`Youdao`, () => {
-  const [FROM, DOCTYPE, QUERY, KEY] = [`YoungdzeBlog`, `json`, `require`, 498418215];
-  const REQ_URL = `https://fanyi.youdao.com/openapi.do?keyfrom=${FROM}&key=${KEY}&type=data&doctype=${DOCTYPE}&version=1.1&q=${QUERY}`;
+  const [FROM, TO, DOCTYPE, QUERY, KEY, SECRET] = [`en`, 'zh-CHS', `json`, `require`, '243870cca0d63a90', '9cT837z1qrNa1SS3CJgZTY9rqPBk78Xa'];
+  let salt = Date.now()
+  let sign = md5(`${KEY}${QUERY}${salt}${SECRET}`);
+  const REQ_URL = `https://openapi.youdao.com/api?from=${FROM}&to=${TO}&appKey=${KEY}&salt=${salt}&sign=${sign}&q=${QUERY}`;
   const URL_REG = /^(ftp|https?:\/\/)?(((www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)|localhost|(([1-9]\d{2}\.){3}[1-9]\d{2}))([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/i;
 
   let youdao = new Youdao(FROM, KEY, DOCTYPE, QUERY);
@@ -34,10 +37,12 @@ describe(`Youdao`, () => {
     let parsedJson = {};
 
     before((done) => {
-      fetch(REQ_URL).then(res => res.json().then(json => {
-        parsedJson = youdao.parseJsonContent(json);
-        done();
-      }));
+      fetch(REQ_URL).then(res => {
+          res.json().then(json => {
+              parsedJson = youdao.parseJsonContent(json);
+              done();
+          }).catch(res => done())
+      }).catch(res => done())
     });
 
     it(`should has necessary properties`, () => {

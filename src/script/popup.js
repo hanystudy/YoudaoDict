@@ -5,8 +5,8 @@ import '../style/popup.scss';
 import Youdao from './util/youdao';
 
 class Popup {
-  static keyfrom = 'YoungdzeBlog';
-  static key = 498418215;
+  static keyfrom = '243870cca0d63a90';
+  static key = '9cT837z1qrNa1SS3CJgZTY9rqPBk78Xa';
 
   static renderResult(resultJson) {
     resultWrapper.innerHTML = require('../tpl/popup-result.pug')(resultJson);
